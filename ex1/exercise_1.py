@@ -3,7 +3,6 @@
 #
 # Author: Your Name <your@email.com>
 import numpy as np
-import numpy as np
 
 import itertools
 from collections import namedtuple
@@ -110,7 +109,7 @@ def dynamic_programming(nodes, edges,backward):
 
     return processed_nodes,ptr
 
-def backtrack(nodes, edges, processed_nodes, ptr,backward):
+def backtrack(nodes, edges, processed_nodes, ptr):
     processed_nodes = list(reversed(processed_nodes))
     assignment=[ptr]
     for index,node in enumerate(processed_nodes):
