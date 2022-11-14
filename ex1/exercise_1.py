@@ -60,7 +60,12 @@ def get_Theta(processed_nodes):
 
 
 
-def dynamic_programming(nodes, edges,backward):
+def dynamic_programming(nodes, edges):
+    #checking wheather this a forward or a backward labeling
+    backward = False
+    if edges[0].left != 0:
+        backward = True
+
 
     # make sure that i only use the edges that would make the a chain (right = left - 1) 
     #new_edges = [edge for edge in edges if (edge.right - edge.left == 1)]
@@ -88,7 +93,7 @@ def dynamic_programming(nodes, edges,backward):
                 comparision_array = []
                 for prev_index,prev_label in enumerate (processed_nodes[index-1].processed_labels):
                      # sum unary cost(modified node[0]) and the bellman function (modified node[1]) + the pairwise cost (the corresbonding edge)
-                     if backward:
+                     if backward :
                          value = prev_label.F + prev_label.unary_cost + edges[index-1].costs[(curr_index,prev_index)]
                      else:
                         value = prev_label.F + prev_label.unary_cost + edges[index-1].costs[(prev_index,curr_index)]
@@ -106,7 +111,6 @@ def dynamic_programming(nodes, edges,backward):
                 ptr = np.argmin(last_node_comparision_array)
 
                 
-
     return processed_nodes,ptr
 
 def backtrack(nodes, edges, processed_nodes, ptr):
@@ -127,9 +131,9 @@ def backtrack(nodes, edges, processed_nodes, ptr):
 def compute_min_marginals(nodes, edges):
 
     # run the algorithm forward 
-    processed_nodes,ptr = dynamic_programming(nodes, edges,False)
+    processed_nodes,ptr = dynamic_programming(nodes, edges)
     # run the algorithm Backward
-    processed_nodess_rev,ptr_rev = dynamic_programming(list(reversed(nodes)),list(reversed(edges)),True) 
+    processed_nodess_rev,ptr_rev = dynamic_programming(list(reversed(nodes)),list(reversed(edges))) 
     
     F = get_Fn(processed_nodes)
 

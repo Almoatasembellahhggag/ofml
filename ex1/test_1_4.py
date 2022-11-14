@@ -45,7 +45,7 @@ ground_truth = (3, 2, 5, 7, 0, 7, 7, 1, 6, 1, 2, 0, 7, 6, 5)
 
 
 def run_test():
-    intermediates = student.dynamic_programming (nodes,edges,False)
+    intermediates = student.dynamic_programming (nodes,edges)
     assert tuple(student.backtrack(nodes, edges, *intermediates)) == ground_truth
     print('Ok')
 
