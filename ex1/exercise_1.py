@@ -6,6 +6,10 @@ import numpy as np
 
 import itertools
 from collections import namedtuple
+from edge import Edge
+from label import Label
+from node import Node
+
 
 
 # For exercise 1.2
@@ -40,24 +44,6 @@ def bruteforce(nodes, edges):
 
 
 # For exercise 1.4
-def get_Fn(processed_nodes):
-    F =[]
-    for node in processed_nodes:
-        labels =[]
-        for label in node.processed_labels:
-            labels.append (label.F)
-        F.append(labels)   
-    return F
-
-def get_Theta(processed_nodes):
-    Theta =[]
-    for node in processed_nodes:
-        labels =[]
-        for label in node.processed_labels:
-            labels.append (label.unary_cost)
-        Theta.append(labels)   
-    return Theta     
-
 
 
 def dynamic_programming(nodes, edges):
@@ -93,11 +79,8 @@ def dynamic_programming(nodes, edges):
                 comparision_array = []
                 for prev_index,prev_label in enumerate (processed_nodes[index-1].processed_labels):
                      # sum unary cost(modified node[0]) and the bellman function (modified node[1]) + the pairwise cost (the corresbonding edge)
-                     if backward :
-                         value = prev_label.F + prev_label.unary_cost + edges[index-1].costs[(curr_index,prev_index)]
-                     else:
-                        value = prev_label.F + prev_label.unary_cost + edges[index-1].costs[(prev_index,curr_index)]
-                     comparision_array.append(value)
+                    value = prev_label.F + prev_label.unary_cost + edges[index-1].costs[(curr_index if backward else prev_index,prev_index if backward else curr_index)]
+                    comparision_array.append(value)
                      
                 new_label = processed_label(F=np.min(comparision_array),unary_cost=curr_label,connected_label=np.argmin(comparision_array))
                 list_of_processed_labels.append(new_label)
@@ -112,6 +95,7 @@ def dynamic_programming(nodes, edges):
 
                 
     return processed_nodes,ptr
+    
 
 def backtrack(nodes, edges, processed_nodes, ptr):
     processed_nodes = list(reversed(processed_nodes))
@@ -122,6 +106,26 @@ def backtrack(nodes, edges, processed_nodes, ptr):
             assignment.append(next_step)
  
     return list(reversed(assignment))
+
+
+def get_Fn(processed_nodes):
+    F =[]
+    for node in processed_nodes:
+        labels =[]
+        for label in node.processed_labels:
+            labels.append (label.F)
+        F.append(labels)   
+    return F
+
+
+def get_Theta(processed_nodes):
+    Theta =[]
+    for node in processed_nodes:
+        labels =[]
+        for label in node.processed_labels:
+            labels.append (label.unary_cost)
+        Theta.append(labels)   
+    return Theta     
 
 
 
@@ -148,10 +152,69 @@ def compute_min_marginals(nodes, edges):
 
 # For execrise 1.6
 
+
+
+
+
 def dynamic_programming_tree(nodes, edges):
-    F, ptr = None, None
-    return F, ptr
+    
+    edges_list = [Edge(right=edge.right,left=edge.left,costs=edge.costs) for edge in edges]
+    nodes_list = [Node(costs=[Label(unary_cost= cost,node_id=index,label_index=label_index ) for label_index,cost in enumerate(node.costs) ],F=node.costs,node_id= index,edges=edges_list) for index,node in enumerate(nodes)]
+    F =[]
+    index = 0 
+    original_length = len(nodes_list)     
+ 
+    while (len (nodes_list) > 1):   
+        node = nodes_list[index]
+        if (node.is_a_a_leaf()):
+           
+            right_or_left =  True if (node.get_connected_edge().get_Left() == node.get_node_id()) else False
+                            
+            connected_node_index = 0
+            
+            for ii , nn in enumerate(nodes_list):
+                if node.get_Conected_node() == nn.get_node_id():
+                    connected_node_index += ii
+                    break
+                          
+            nodes_list[connected_node_index].calculate(node,right_or_left)
+            
+
+            edges_list.remove(node.get_connected_edge())
+            F.append([label for label in node.get_costs()])
+            nodes_list.remove(node)  
+            
+            for n in nodes_list:
+                if n != node:
+                    n.reset(edges_list)
+            index =0
+            continue
+                           
+        else:
+            index+=1 
+    costss=[]       
+    for cost in nodes_list[0].get_costs():
+        costss.append(cost.get_F())
+        
+    ptr = np.argmin(costss)    
+        
+    F,ptr = list(reversed(F)), int(ptr)
+    
+         
+    return F,ptr
 
 def backtrack_tree(nodes, edges, F, ptr):
-    assignment = [0] * len(nodes)
+    assignment = [ptr]
+    print(type(assignment[-1]))
+    F.remove((F[0]))
+    for array in F :
+        (array[9].Print_Label())
+        #assignment.append(array[9].get_connected_label().get_index())
+    
+            
+        
+    print(assignment)
+         
+    
+    
     return assignment
